@@ -1,0 +1,36 @@
+db-path: "/sui-db"
+
+network-address: "/dns/localhost/tcp/8080/http"
+metrics-address: "0.0.0.0:9184"
+json-rpc-address: "0.0.0.0:9000"
+enable-event-processing: true
+
+p2p-config:
+  listen-address: "0.0.0.0:8084"
+
+genesis:
+  genesis-file-location: "/sui-config/genesis.blob"
+
+authority-store-pruning-config:
+  num-latest-epoch-dbs-to-retain: 3
+  epoch-db-pruning-period-secs: 3600
+  num-epochs-to-retain: 1
+  max-checkpoints-in-batch: 10
+  max-transactions-in-batch: 1000
+  pruning-run-delay-seconds: 60
+  use-range-deletion: true
+
+checkpoint-executor-config:
+  checkpoint-execution-max-concurrency: 200
+  local-execution-timeout-sec: 30
+  data-ingestion-dir: "/sui-data"
+
+state-archive-read-config:
+  - object-store-config:
+      object-store: "S3"
+      bucket: "mysten-testnet-archives"
+      no-sign-request: true
+      aws-region: "us-west-2"
+      object-store-connection-limit: 20
+    concurrency: 5
+    use-for-pruning-watermark: false

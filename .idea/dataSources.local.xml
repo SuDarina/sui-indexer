@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal" created-in="IU-243.26053.27">
+    <data-source name="sui_index@localhost" uuid="735725e4-b9f0-40ba-adc1-c96e58a69097">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="POSTGRES" />
+      <user-name>sui_user</user-name>
+      <schema-mapping />
+    </data-source>
+    <data-source name="sui_index@localhost [2]" uuid="26e96b8a-15c6-4fc5-9b52-c7bcc90aa25f">
+      <database-info product="" version="" jdbc-version="" driver-name="" driver-version="" dbms="POSTGRES" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>sui_user</user-name>
+      <schema-mapping />
+    </data-source>
+  </component>
+</project>

@@ -1,0 +1,3 @@
+fullnameOverride: "clickhouse-operator"
+watchNamespaces:
+  - "clickhouse"

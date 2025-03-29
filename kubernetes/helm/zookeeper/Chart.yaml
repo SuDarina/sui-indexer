@@ -1,0 +1,8 @@
+apiVersion: v2
+name: zookeeper
+description: Zookeeper for ClickHouse
+version: 0.1.0
+dependencies:
+  - name: zookeeper
+    repository: https://charts.bitnami.com/bitnami
+    version: 11.1.6  # Актуальная версия чарта

@@ -1,0 +1,8 @@
+apiVersion: v2
+name: clickhouse-operator
+description: "Wrapper for Altinity ClickHouse Operator"
+version: 0.1.0
+dependencies:
+  - name: clickhouse-operator
+    version: 0.18.0       # Проверьте актуальную версию!
+    repository: https://altinity.github.io/clickhouse-operator

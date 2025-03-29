@@ -1,0 +1,27 @@
+# Минимальные настройки для PostgreSQL с репликацией
+global:
+  postgresql:
+    username: "sui_user"
+    password: "sui_pass"  # В production используйте Secrets!
+    database: "sui_index"
+    replicationUser: "repl_user"
+    replicationPassword: "repl_password"  # Пароль для репликации
+
+primary:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+
+readReplicas:
+  enabled: true
+  replicaCount: 2  # Количество реплик
+  persistence:
+    enabled: true
+    size: 10Gi
+
+service:
+  type: ClusterIP
+  ports:
+    primary: 5432
+    replicas: 5432

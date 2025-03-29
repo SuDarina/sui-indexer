@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: clickhouse-allow
+  namespace: clickhouse
+spec:
+  podSelector:
+    matchLabels:
+      app: clickhouse
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: clickhouse
+        - podSelector:
+            matchLabels:
+              app: zookeeper
+      ports:
+        - protocol: TCP
+          port: 9000
+        - protocol: TCP
+          port: 8123
