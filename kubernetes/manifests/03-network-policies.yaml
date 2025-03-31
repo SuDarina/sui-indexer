@@ -1,19 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: clickhouse-allow
-  namespace: clickhouse
+  name: sui-indexer-allow
+  namespace: sui-indexer
 spec:
   podSelector:
     matchLabels:
-      app: clickhouse
+      app: sui-indexer
   policyTypes:
     - Ingress
   ingress:
     - from:
         - podSelector:
             matchLabels:
-              app: clickhouse
+              app: sui-indexer
         - podSelector:
             matchLabels:
               app: zookeeper

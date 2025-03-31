@@ -1,0 +1,77 @@
+global:
+  storageClass: "standard"  # Укажите ваш StorageClass
+
+postgresql:
+  username: "postgres"      # Основной суперпользователь
+  password: "postgres123"   # Пароль для postgres (в production используйте секреты!)
+  database: "appdb"         # Создаваемая БД
+  repmgrUsername: "repmgr"  # Специальный пользователь для репликации
+  repmgrPassword: "repmgr123"
+  repmgrDatabase: "repmgr"  # Служебная БД для управления репликацией
+
+  replication:
+    enabled: true
+    user: "replicator"      # Пользователь для потоковой репликации
+    password: "replicator123"
+    numSynchronousReplicas: 1  # Для синхронной репликации
+
+  persistence:
+    enabled: true
+    size: 10Gi              # Размер диска для production увеличьте до 100Gi+
+    accessModes:
+      - ReadWriteOnce
+
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+  livenessProbe:
+    initialDelaySeconds: 120
+    periodSeconds: 10
+
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+pgpool:
+  enabled: true             # Включить pgpool для балансировки
+  adminUsername: "admin"
+  adminPassword: "pgpooladmin123"
+  numInitChildren: 50      # Количество соединений
+  maxPool: 25              # Макс. соединений на сервер
+
+  persistence:
+    enabled: false         # Для pgpool обычно не требуется
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 300m
+    limits:
+      memory: 1Gi
+      cpu: 800m
+
+volumePermissions:
+  enabled: true           # Автоматически исправлять права на volume
+
+metrics:
+  enabled: true           # Включить метрики для Prometheus
+  serviceMonitor:
+    enabled: false        # Для использования с kube-prometheus-stack
+
+# Настройки для HA
+service:
+  type: ClusterIP
+  ports:
+    postgresql: 5432
+    repmgr: 5432
+
+# Настройки readiness/liveness
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 300  # Большой таймаут для инициализации
+  periodSeconds: 10

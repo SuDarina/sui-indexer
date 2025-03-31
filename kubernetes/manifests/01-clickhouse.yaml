@@ -2,7 +2,7 @@ apiVersion: "clickhouse.altinity.com/v1"
 kind: "ClickHouseInstallation"
 metadata:
   name: clickhouse-cluster
-  namespace: clickhouse
+  namespace: sui-indexer
 spec:
   configuration:
     clusters:
@@ -10,12 +10,12 @@ spec:
         layout:
           shardsCount: 1
           replicasCount: 3
-        zookeeper:
-          nodes:
-            - host: zookeeper-0.zookeeper.clickhouse.svc.cluster.local
-              port: 2181
-            - host: zookeeper-1.zookeeper.clickhouse.svc.cluster.local
-              port: 2181
+#        zookeeper:
+#          nodes:
+#            - host: zookeeper-0.zookeeper.clickhouse.svc.cluster.local
+#              port: 2181
+#            - host: zookeeper-1.zookeeper.clickhouse.svc.cluster.local
+#              port: 2181
   templates:
     podTemplates:
       - name: clickhouse-pod

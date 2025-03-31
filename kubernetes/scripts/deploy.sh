@@ -2,36 +2,33 @@
 set -e  # Прерывать выполнение при ошибках
 
 # 1. Создаем namespace
-kubectl apply -f ../manifests/00-namespace-clickhouse.yaml
+kubectl apply -f ../manifests/00-namespace.yaml
 
-# 2. Устанавливаем Zookeeper (только 2 реплики для minikube)
-kubectl apply -f ../manifests/01-zookeeper.yaml
 
-# 3. Ждем готовности Zookeeper (только 2 пода)
-kubectl wait --for=condition=Ready pod/zookeeper-0 -n clickhouse --timeout=300s
-kubectl wait --for=condition=Ready pod/zookeeper-1 -n clickhouse --timeout=300s
-
-# 4. Устанавливаем ClickHouse Operator
+# 2. Устанавливаем ClickHouse Operator
 helm repo add altinity https://altinity.github.io/clickhouse-operator
 helm repo update
 helm upgrade --install clickhouse-operator altinity/altinity-clickhouse-operator \
-  --namespace clickhouse \
+  --namespace sui-indexer \
   --values ../helm/clickhouse-operator/values.yaml
 
-# 5. Ждем инициализации CRD
+# 3. Ждем инициализации CRD
 until kubectl get crd clickhouseinstallations.clickhouse.altinity.com &>/dev/null; do
   sleep 2
   echo "Ожидание доступности CRD..."
 done
 
-# 6. Разворачиваем ClickHouse кластер
-kubectl apply -f ../manifests/02-clickhouse.yaml
+# 4. Настройка Kafka
+helm upgrade --install kafka-operator -f ../helm/kafka/values.yaml strimzi/strimzi-kafka-operator -n sui-indexer
+kubectl apply -f ../manifests/02-kafka-cluster.yaml -n sui-indexer
 
-# Настройка PostgreSql
-kubectl apply -f manifests/03-postgresql/
-./scripts/setup-postgres-replication.sh
+# 5. Разворачиваем ClickHouse кластер
+kubectl apply -f ../manifests/01-clickhouse.yaml
+
+# 6. Настройка PostgreSql
+helm upgrade postgresql-ha bitnami/postgresql-ha -n sui-indexer -f ../helm/postgresql-ha/values.yaml
 
 # 7. Применяем Network Policies
-kubectl apply -f ../manifests/04-network-policies.yaml
+#kubectl apply -f ../manifests/03-network-policies.yaml
 
-echo "ClickHouse кластер успешно развернут!"
+echo "Sui-indexer кластер успешно развернут!"
