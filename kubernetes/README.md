@@ -12,6 +12,13 @@ minikube start --cpus=4 --memory=8192 --disk-size=50g
 minikube stop
 ```
 
+
+Команда для получения внешнего IP системы для доступа к API:
+
+```bash
+minikube service sui-api-service -n sui-indexer --url
+```
+
 ## Requirements
 - Kubernetes 1.19+
 - Helm 3.2+

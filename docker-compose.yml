@@ -217,6 +217,29 @@ services:
           " > /etc/clickhouse-server/config.d/replication.xml
           exec /usr/bin/clickhouse-server --config-file=/etc/clickhouse-server/config.xml
 
+  indexing-service:
+    build:
+      context: ./indexing-service
+      dockerfile: Dockerfile
+    container_name: indexing-service
+    environment:
+        - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    depends_on:
+      - postgres-master
+    ports:
+      - "8081:8081"
+
+  sui-api:
+    build:
+      context: ./sui-api
+      dockerfile: Dockerfile
+    container_name: sui-api
+    environment:
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    depends_on:
+      - postgres-master
+    ports:
+      - "8082:8082"
 
 volumes:
   pg_master_data:
