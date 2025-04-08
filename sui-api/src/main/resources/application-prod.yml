@@ -4,9 +4,9 @@ spring:
   application:
     name: sui-api
   datasource:
-    url: jdbc:postgresql://postgresql-ha-postgresql-headless.sui-indexer.svc.cluster.local:5432/sui_index?loadBalanceHosts=true&targetServerType=prefer-secondary
-    username: sui_user
-    password: sui_pass
+    url: jdbc:postgresql://postgresql-ha-postgresql-headless.sui-indexer.svc.cluster.local:5432/appdb?loadBalanceHosts=true&targetServerType=preferSecondary
+    username: postgres
+    password: postgres123
     hikari:
       connection-init-sql: "SET TRANSACTION READ ONLY"
   jpa:
