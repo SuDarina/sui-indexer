@@ -4,9 +4,9 @@ spring:
   application:
     name: sui-api
   datasource:
-    url: jdbc:postgresql://localhost:54321/sui_index
-    username: sui_user
-    password: sui_pass
+    url: jdbc:postgresql://localhost:54321/suiindex
+    username: postgres
+    password: postgres3
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

@@ -4,7 +4,7 @@ global:
 postgresql:
   username: "postgres"      # Основной суперпользователь
   password: "postgres123"   # Пароль для postgres (в production используйте секреты!)
-  database: "appdb"         # Создаваемая БД
+  database: "suiindex"         # Создаваемая БД
   repmgrUsername: "repmgr"  # Специальный пользователь для репликации
   repmgrPassword: "repmgr123"
   repmgrDatabase: "repmgr"  # Служебная БД для управления репликацией

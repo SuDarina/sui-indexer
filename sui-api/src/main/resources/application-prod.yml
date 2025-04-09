@@ -4,7 +4,7 @@ spring:
   application:
     name: sui-api
   datasource:
-    url: jdbc:postgresql://postgresql-ha-postgresql-headless.sui-indexer.svc.cluster.local:5432/appdb?loadBalanceHosts=true&targetServerType=preferSecondary
+    url: jdbc:postgresql://postgresql-ha-postgresql-headless.sui-indexer.svc.cluster.local:5432/suiindex?loadBalanceHosts=true&targetServerType=preferSecondary
     username: postgres
     password: postgres123
     hikari:
