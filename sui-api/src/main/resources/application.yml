@@ -15,6 +15,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  clickhouse:
+    datasource:
+      jdbc-url: jdbc:clickhouse://localhost:8123/suiaggr
+      username: suiuser
+      password: "suipass"
+      driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
 #springdoc:
 #  api-docs:
 #    path: /v3/api-docs/flight-aggregator

@@ -55,167 +55,32 @@ services:
            "activeOffsetCacheEnabled": false }]
     restart: always
 
-  # PostgreSQL Master
-  postgres-master:
+  sui-postgres:
     image: postgres:15
-    container_name: postgres-master
+    container_name: sui-postgres
     user: postgres
     environment:
-      POSTGRES_USER: sui_user
-      POSTGRES_PASSWORD: sui_pass
-      POSTGRES_DB: sui_index
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres3
+      POSTGRES_DB: suiindex
     ports:
       - "54321:5432"
     volumes:
-      - pg_master_data:/var/lib/postgresql/data
-    command: >
-      bash -c "
-            echo 'Configuring master server...' &&
-            echo 'wal_level = replica' >> /var/lib/postgresql/data/postgresql.conf &&
-            echo 'max_wal_senders = 10' >> /var/lib/postgresql/data/postgresql.conf &&
-            echo 'wal_keep_size = 1GB' >> /var/lib/postgresql/data/postgresql.conf &&
-            echo 'hot_standby = on' >> /var/lib/postgresql/data/postgresql.conf &&
-            echo 'host replication sui_user 0.0.0.0/0 md5' >> /var/lib/postgresql/data/pg_hba.conf &&
-            exec postgres -c config_file=/var/lib/postgresql/data/postgresql.conf"
+      - pg_data:/var/lib/postgresql/data
 
-  postgres-replica:
-    image: postgres:15
-    container_name: postgres-replica
-    user: postgres
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ch_data:/var/lib/clickhouse
+      - ./init:/docker-entrypoint-initdb.d/
     environment:
-      POSTGRES_USER: sui_user
-      POSTGRES_PASSWORD: sui_pass
-      POSTGRES_DB: sui_index
-    ports:
-      - "54322:5432"
-    depends_on:
-      - postgres-master
-    volumes:
-      - pg_replica_data:/var/lib/postgresql/data
-    command: >
-      bash -c "
-            echo 'Waiting for master to be ready...' &&
-            until pg_isready -h postgres-master -p 5432 -U sui_user; do sleep 1; done &&
-            echo 'Setting up replica...' &&
-            rm -rf /var/lib/postgresql/data/* &&
-            PGPASSWORD=sui_pass pg_basebackup -h postgres-master -p 5432 -U sui_user -D /var/lib/postgresql/data -Fp -Xs -P -R &&
-            echo \"primary_conninfo = 'host=postgres-master port=5432 user=sui_user password=sui_pass'\" >> /var/lib/postgresql/data/postgresql.conf &&
-            echo \"promote_trigger_file = '/tmp/promote_to_master'\" >> /var/lib/postgresql/data/postgresql.conf &&
-            touch /var/lib/postgresql/data/standby.signal &&
-            chmod 700 /var/lib/postgresql/data &&
-            exec postgres -c config_file=/var/lib/postgresql/data/postgresql.conf"
-
-  # ClickHouse Replica
-  clickhouse-master:
-    image: clickhouse/clickhouse-server:23.8
-    container_name: clickhouse-master
-    user: clickhouse
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-    ports:
-      - "8123:8123" # HTTP
-      - "9001:9000" # Native TCP
-      - "9009:9009" # Interserver HTTP
-    volumes:
-      - ch_master_data:/var/lib/clickhouse
-      - ch_master_config:/etc/clickhouse-server
-    command:
-      - /bin/bash
-      - -c
-      - |
-        echo "Configuring master server..."
-        echo -e "
-        <yandex>
-          <zookeeper>
-            <node index=\"1\">
-              <host>zookeeper</host>
-              <port>2181</port>
-            </node>
-          </zookeeper>
-          <distributed_ddl>
-            <path>/clickhouse/task_queue/ddl</path>
-          </distributed_ddl>
-          <remote_servers>
-            <replicated_cluster>
-              <shard>
-                <replica>
-                  <host>clickhouse-master</host>
-                  <port>9000</port>
-                </replica>
-                <replica>
-                  <host>clickhouse-replica</host>
-                  <port>9000</port>
-                </replica>
-              </shard>
-            </replicated_cluster>
-          </remote_servers>
-          <macros>
-            <shard>1</shard>
-            <replica>master</replica>
-          </macros>
-        </yandex>
-        " > /etc/clickhouse-server/config.d/replication.xml
-        exec /usr/bin/clickhouse-server --config-file=/etc/clickhouse-server/config.xml
-
-  clickhouse-replica:
-      image: clickhouse/clickhouse-server:23.8
-      container_name: clickhouse-replica
-      user: clickhouse
-      depends_on:
-        - clickhouse-master
-        - zookeeper
-      ulimits:
-        nofile:
-          soft: 262144
-          hard: 262144
-      ports:
-        - "8124:8123" # HTTP
-        - "9002:9000" # Native TCP
-        - "9010:9009" # Interserver HTTP
-      volumes:
-        - ch_replica_data:/var/lib/clickhouse
-        - ch_replica_config:/etc/clickhouse-server
-      command:
-        - /bin/bash
-        - -c
-        - |
-          echo "Waiting for master to be ready..."
-          while ! clickhouse-client --host clickhouse-master --query "SELECT 1"; do sleep 1; done
-          echo "Configuring replica server..."
-          echo -e "
-          <yandex>
-            <zookeeper>
-              <node index=\"1\">
-                <host>zookeeper</host>
-                <port>2181</port>
-              </node>
-            </zookeeper>
-            <distributed_ddl>
-              <path>/clickhouse/task_queue/ddl</path>
-            </distributed_ddl>
-            <remote_servers>
-              <replicated_cluster>
-                <shard>
-                  <replica>
-                    <host>clickhouse-master</host>
-                    <port>9000</port>
-                  </replica>
-                  <replica>
-                    <host>clickhouse-replica</host>
-                    <port>9000</port>
-                  </replica>
-                </shard>
-              </replicated_cluster>
-            </remote_servers>
-            <macros>
-              <shard>1</shard>
-              <replica>replica</replica>
-            </macros>
-          </yandex>
-          " > /etc/clickhouse-server/config.d/replication.xml
-          exec /usr/bin/clickhouse-server --config-file=/etc/clickhouse-server/config.xml
+      CLICKHOUSE_DB: suiaggr
+      CLICKHOUSE_USER: suiuser
+      CLICKHOUSE_PASSWORD: suipass
 
   indexing-service:
     build:
@@ -225,7 +90,7 @@ services:
     environment:
         - SPRING_JPA_HIBERNATE_DDL_AUTO=none
     depends_on:
-      - postgres-master
+      - sui-postgres
     ports:
       - "8081:8081"
 
@@ -237,16 +102,10 @@ services:
     environment:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
     depends_on:
-      - postgres-master
+      - sui-postgres
     ports:
       - "8082:8082"
 
 volumes:
-  pg_master_data:
-  pg_replica_data:
-  ch_master_data:
-  ch_master_config:
-  ch_replica_data:
-  ch_replica_config:
-
-
+  pg_data:
+  ch_data:
