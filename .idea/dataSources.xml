@@ -14,11 +14,11 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="sui_index@localhost [2]" uuid="26e96b8a-15c6-4fc5-9b52-c7bcc90aa25f">
+    <data-source source="LOCAL" name="suiindex@localhost" uuid="26e96b8a-15c6-4fc5-9b52-c7bcc90aa25f">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:54322/sui_index</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:54321/suiindex</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />

@@ -2,7 +2,7 @@ package com.itmo.indexing_service.model.object;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.MapDeserializer;
+import com.itmo.indexing_service.model.object.owner.Ownership;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +18,7 @@ public class ObjectData {
     private ObjectContent data;
 
     @JsonProperty("owner")
-    private Map<String, Object> owner;
+    private Ownership owner;
 
     @JsonProperty("previous_transaction")
     private String previousTransaction;

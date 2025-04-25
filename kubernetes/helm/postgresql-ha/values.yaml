@@ -3,7 +3,7 @@ global:
 
 postgresql:
   username: "postgres"      # Основной суперпользователь
-  password: "postgres123"   # Пароль для postgres (в production используйте секреты!)
+  password: "postgres3"   # Пароль для postgres (в production используйте секреты!)
   database: "suiindex"         # Создаваемая БД
   repmgrUsername: "repmgr"  # Специальный пользователь для репликации
   repmgrPassword: "repmgr123"

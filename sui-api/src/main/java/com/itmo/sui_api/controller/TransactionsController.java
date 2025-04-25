@@ -1,7 +1,7 @@
 package com.itmo.sui_api.controller;
 
 import com.itmo.model.clickhouse.MinuteTransaction;
-import com.itmo.sui_api.repository.clickhouse.TransactionsRepository;
+import com.itmo.sui_api.repository.clickhouse.ClickHouseTransactionsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/sui-api/v1/transactions")
 public class TransactionsController {
 
-    private final TransactionsRepository transactionsRepository;
+    private final ClickHouseTransactionsRepository clickHouseTransactionsRepository;
 
     @PostMapping
-    public ResponseEntity<String> insertTransaction(@RequestBody MinuteTransaction transaction) {
-        transactionsRepository.insertTransaction(transaction);
+    public ResponseEntity<String> insertMinuteTransaction(@RequestBody MinuteTransaction transaction) {
+        clickHouseTransactionsRepository.insertMinuteTransaction(transaction);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

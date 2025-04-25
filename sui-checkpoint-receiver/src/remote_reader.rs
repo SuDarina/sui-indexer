@@ -25,10 +25,7 @@ impl Worker for CustomWorker {
             .key(&sequence_number_str);
 
         match self.kafka_producer.send(record, Duration::from_secs(0)).await {
-            Ok(_) => println!(
-                "Sent checkpoint {} to Kafka",
-                checkpoint.checkpoint_summary.sequence_number
-            ),
+            Ok(_) => {},
             Err((e, _)) => eprintln!("Error sending to Kafka: {:?}. Details: {:?}", e, e.to_string()),
         }
 

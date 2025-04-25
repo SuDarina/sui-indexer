@@ -42,7 +42,7 @@ services:
       - zookeeper
       - kafka
     ports:
-      - "9000:9000"
+      - "9001:9000"
     environment:
       ZK_HOSTS: zookeeper:2181
       KAFKA_MANAGER_AUTH_ENABLED: "false"
@@ -68,6 +68,21 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
+  sui-liquibase-postgres:
+    image: liquibase/liquibase
+    container_name: sui-liquibase-postgres
+    depends_on:
+      - sui-postgres
+    volumes:
+      - ./docker-config/liquibase/db/changelog:/liquibase/changelog
+    environment:
+      POSTGRESQL_URL: jdbc:postgresql://sui-postgres:5432/suiindex
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres3
+    command: >
+      /bin/sh -c "liquibase --url=jdbc:postgresql://sui-postgres:5432/suiindex --username=postgres 
+      --password=postgres3 --changelog-file=master.xml --searchPath=/liquibase/changelog update"
+
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse
@@ -76,7 +91,7 @@ services:
       - "9000:9000"
     volumes:
       - ch_data:/var/lib/clickhouse
-      - ./init:/docker-entrypoint-initdb.d/
+      - ./docker-config/clickhouse/init:/docker-entrypoint-initdb.d/
     environment:
       CLICKHOUSE_DB: suiaggr
       CLICKHOUSE_USER: suiuser
@@ -104,6 +119,7 @@ services:
     depends_on:
       - sui-postgres
     ports:
+      - "8082:8082"
       - "8082:8082"
 
 volumes:

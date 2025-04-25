@@ -33,10 +33,10 @@ async fn main() -> Result<()> {
 
 		executor.register(worker_pool).await?;
 		executor.run(
-				PathBuf::from("../sui-data".to_string()), // path to a local directory
+				PathBuf::from("../sui-data".to_string()), 
 				None,
-				vec![], // optional remote store access options
-				ReaderOptions::default(),			 /* remote_read_batch_size */
+				vec![], 
+				ReaderOptions::default(),			
 				exit_receiver,
 				).await?;
 		Ok(())

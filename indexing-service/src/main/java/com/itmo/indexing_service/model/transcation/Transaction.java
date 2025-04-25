@@ -19,9 +19,10 @@ public class Transaction {
     @JsonProperty("events")
     private Object events;
 
+    // TODO заменить Object на ObjectData, либо просто проставить игнор при десериализации
     @JsonProperty("input_objects")
-    private List<ObjectData> inputObjects;
+    private List<Object> inputObjects;
 
     @JsonProperty("output_objects")
-    private List<ObjectData> outputObjects;
+    private List<Object> outputObjects;
 }

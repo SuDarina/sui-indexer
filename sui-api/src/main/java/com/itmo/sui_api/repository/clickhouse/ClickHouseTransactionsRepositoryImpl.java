@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class TransactionsRepositoryImpl implements TransactionsRepository {
+public class ClickHouseTransactionsRepositoryImpl implements ClickHouseTransactionsRepository {
 
     private final ClickHouseJdbcTemplate clickHouseJdbcTemplate;
 
     @Override
-    public void insertTransaction(MinuteTransaction transaction) {
+    public void insertMinuteTransaction(MinuteTransaction transaction) {
         String sql = """
             
                 INSERT INTO suiaggr.minute_transactions (
@@ -44,7 +44,7 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
     }
 
     @Override
-    public void batchInsertTransactions(List<MinuteTransaction> transactions) {
+    public void batchInsertMinuteTransactions(List<MinuteTransaction> transactions) {
         String sql =
                 """
     
