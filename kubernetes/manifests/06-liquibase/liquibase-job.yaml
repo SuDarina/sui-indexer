@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: liquibase-init
+  namespace: sui-indexer
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+        - name: liquibase
+          image: dordidora/sui-liquibase:latest  # твой кастомный образ
+          command:
+            - liquibase
+            - --changeLogFile=master.xml
+            - --searchPath=/liquibase/changelog
+            - --url=jdbc:postgresql://postgresql-ha-postgresql.sui-indexer.svc.cluster.local:5432/suiindex
+            - --username=postgres
+            - --password=postgres3
+            - --driver=org.postgresql.Driver
+            - update
+      restartPolicy: Never

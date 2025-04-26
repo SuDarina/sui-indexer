@@ -25,15 +25,26 @@ set -e  # Прерывать выполнение при ошибках
 ## 5. Разворачиваем ClickHouse кластер
 #kubectl apply -f ../manifests/01-clickhouse.yaml
 #
-## 6. Настройка PostgreSql
-#helm upgrade postgresql-ha bitnami/postgresql-ha -n sui-indexer -f ../helm/postgresql-ha/values.yaml
+# 6. Настройка PostgreSql
+helm upgrade postgresql-ha bitnami/postgresql-ha -n sui-indexer -f ../helm/postgresql-ha/values.yaml
 
-# 7 Разворачиваем sui-api с балансировщиком нагрузки
-kubectl apply -f ../manifests/05-sui-api/deployment.yaml -n sui-indexer
-kubectl apply -f ../manifests/05-sui-api/service.yaml -n sui-indexer
-kubectl apply -f ../manifests/05-sui-api/hpa.yaml -n sui-indexer
+# Вариант 1 - liquibase
+#kubectl create configmap liquibase-changelog \
+#  --namespace=sui-indexer \
+#  --from-file=../manifests/06-liquibase/changelog.tar.gz \
+#  --dry-run=client -o yaml | kubectl apply -f -
+#kubectl apply -f ../manifests/06-liquibase/job.yaml -n sui-indexer
+
+# Варианте 2 - liquibase
+kubectl apply -f ../manifests/06-liquibase/liquibase-job.yaml -n sui-indexer
+
+## 7 Разворачиваем sui-api с балансировщиком нагрузки
+#kubectl apply -f ../manifests/05-sui-api/deployment.yaml -n sui-indexer
+#kubectl apply -f ../manifests/05-sui-api/service.yaml -n sui-indexer
+#kubectl apply -f ../manifests/05-sui-api/hpa.yaml -n sui-indexer
+
 
 # Применяем Network Policies
-#kubectl apply -f ../manifests/06-network-policies.yaml
+#kubectl apply -f ../manifests/07-network-policies.yaml
 
 echo "Sui-indexer кластер успешно развернут!"
