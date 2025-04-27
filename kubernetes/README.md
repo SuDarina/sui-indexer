@@ -12,6 +12,11 @@ minikube start --cpus=4 --memory=8192 --disk-size=50g
 minikube stop
 ```
 
+Для очистки kubernetes
+```bash
+kubectl delete all --all -n sui-indexer
+kubectl delete configmap --all -n sui-indexer
+```
 
 Команда для получения внешнего IP системы для доступа к API:
 

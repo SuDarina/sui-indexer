@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: liquibase
-          image: dordidora/sui-liquibase:latest  # твой кастомный образ
+          image: dordidora/sui-liquibase:latest
           command:
             - liquibase
             - --changeLogFile=master.xml

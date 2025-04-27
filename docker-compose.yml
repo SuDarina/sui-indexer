@@ -21,6 +21,10 @@ services:
     image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    volumes:
+      - zk_data:/var/lib/zookeeper/data
+    ports:
+      - "2181:2181"
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -84,14 +88,15 @@ services:
       --password=postgres3 --changelog-file=master.xml --searchPath=/liquibase/changelog update"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:latest
+    image: dordidora/sui-clickhouse-server:latest
     container_name: clickhouse
     ports:
       - "8123:8123"
       - "9000:9000"
+      - "9009:9009"
     volumes:
       - ch_data:/var/lib/clickhouse
-      - ./docker-config/clickhouse/init:/docker-entrypoint-initdb.d/
+#      - ./docker-config/clickhouse/init:/docker-entrypoint-initdb.d/
     environment:
       CLICKHOUSE_DB: suiaggr
       CLICKHOUSE_USER: suiuser
@@ -123,5 +128,6 @@ services:
       - "8082:8082"
 
 volumes:
+  zk_data:
   pg_data:
   ch_data:

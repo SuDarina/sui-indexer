@@ -1,0 +1,1 @@
+deleteall /clickhouse/tables/suiaggr/shard1

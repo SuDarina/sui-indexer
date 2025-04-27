@@ -1,5 +1,3 @@
-CREATE DATABASE IF NOT EXISTS suiaggr;
-
 CREATE TABLE IF NOT EXISTS suiaggr.minute_transactions
 (
     `date` Date,
@@ -17,7 +15,8 @@ CREATE TABLE IF NOT EXISTS suiaggr.minute_transactions
     `defi_swaps_count` UInt64,
     `volume_total` Float64
 )
-    ENGINE = MergeTree()
+    ENGINE = ReplicatedMergeTree('/clickhouse/tables/suiaggr/{shard}/minute_transactions', '{replica}')
+--     ENGINE = MergeTree
     PARTITION BY toYYYYMM(date)
     ORDER BY (date, hour, minute);
 
@@ -71,6 +70,8 @@ CREATE TABLE suiaggr.transaction_analytics (
     -- Массив зависимостей (по желанию)
                                        dependencies Array(String)
 )
-    ENGINE = MergeTree
+    ENGINE = ReplicatedMergeTree('/clickhouse/tables/suiaggr/{shard}/transaction_analytics', '{replica}')
+--     ENGINE = MergeTree
+
 PARTITION BY toYYYYMM(date)
 ORDER BY (date, hour, sender);

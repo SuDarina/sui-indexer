@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse
+spec:
+  clusterIP: None
+  selector:
+    app: clickhouse
+  ports:
+    - name: tcp-clickhouse
+      port: 9000
+    - name: http-clickhouse
+      port: 8123
+    - name: keeper-raft
+      port: 9444

@@ -1,0 +1,20 @@
+<yandex>
+  <remote_servers>
+    <clickhouse_cluster>
+      <shard>
+        <replica>
+          <host>clickhouse-0-0.clickhouse.sui-indexer.svc.cluster.local</host>
+          <port>9000</port>
+        </replica>
+        <replica>
+          <host>clickhouse-1-0.clickhouse.sui-indexer.svc.cluster.local</host>
+          <port>9000</port>
+        </replica>
+        <replica>
+          <host>clickhouse-2-0.clickhouse.sui-indexer.svc.cluster.local</host>
+          <port>9000</port>
+        </replica>
+      </shard>
+    </clickhouse_cluster>
+  </remote_servers>
+</yandex>
