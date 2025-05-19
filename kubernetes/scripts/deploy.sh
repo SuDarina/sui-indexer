@@ -23,11 +23,15 @@ done
 
 # 4. Настройка Kafka
 helm upgrade --install kafka-operator -f ../helm/kafka/values.yaml strimzi/strimzi-kafka-operator -n sui-indexer
-kubectl apply -f ../manifests/02-kafka-cluster.yaml -n sui-indexer
+kubectl apply -f ../manifests/02-kafka/kafka-cluster.yaml -n sui-indexer
+kubectl apply -f ../manifests/02-kafka/kafka-topic.yaml
 
-# 6. Настройка PostgreSql
+# 5. Настройка PostgreSql
 helm upgrade postgresql-ha bitnami/postgresql-ha -n sui-indexer -f ../helm/postgresql-ha/values.yaml
 kubectl apply -f ../manifests/06-liquibase/liquibase-job.yaml -n sui-indexer
+
+# 6 Разворачиваем sui-checkpoint-receiver
+kubectl apply -f ../manifests/03-sui-checkpoint-receiver/statefulset.yaml -n sui-indexer
 
 # 7 Разворачиваем sui-api с балансировщиком нагрузки
 kubectl apply -f ../manifests/05-sui-api/deployment.yaml -n sui-indexer

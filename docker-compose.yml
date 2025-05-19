@@ -37,7 +37,9 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+#      TODO (на будущее) лучше запретить автосоздание топиков и контролировать эти параметры для каждого топика отдельно
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_NUM_PARTITIONS: 10
 
   kafka-manager:
     image: hlebalbau/kafka-manager:stable
@@ -102,15 +104,27 @@ services:
       CLICKHOUSE_USER: suiuser
       CLICKHOUSE_PASSWORD: suipass
 
+  sui-checkpoint-receiver:
+    build:
+      context: ./sui-checkpoint-receiver
+      dockerfile: Dockerfile
+    container_name: sui-checkpoint-receiver
+    environment:
+      - POD_NAME=remote-reader-0
+    depends_on:
+      - kafka
+
   indexing-service:
     build:
-      context: ./indexing-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: indexing-service/Dockerfile
     container_name: indexing-service
     environment:
         - SPRING_JPA_HIBERNATE_DDL_AUTO=none
     depends_on:
-      - sui-postgres
+      - kafka
+#      - sui-postgres
+#      - clickhouse
     ports:
       - "8081:8081"
 

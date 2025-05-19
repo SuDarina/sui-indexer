@@ -1,15 +1,20 @@
-FROM eclipse-temurin:21-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine AS build
 
-WORKDIR /app
+WORKDIR /build
 
 COPY . .
 
 RUN chmod +x mvnw
 
-RUN ./mvnw clean package -DskipTests
+RUN ./mvnw -pl sui-api -am clean package -DskipTests
 
-RUN cp ./target/*.jar app.jar
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+COPY --from=build /build/sui-api/target/*.jar app.jar
 
 EXPOSE 8082
 
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
+#ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]

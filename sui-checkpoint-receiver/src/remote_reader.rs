@@ -1,3 +1,4 @@
+use std::env;
 use anyhow::Result;
 use async_trait::async_trait;
 use sui_data_ingestion_core::{setup_single_workflow, Worker};
@@ -9,6 +10,7 @@ use serde_json::to_string;
 
 struct CustomWorker {
     kafka_producer: FutureProducer,
+    ordinal: u64,
 }
 
 #[async_trait]
@@ -18,8 +20,13 @@ impl Worker for CustomWorker {
         
         let checkpoint_json = to_string(&checkpoint)?;
 
-        let sequence_number_str = checkpoint.checkpoint_summary.sequence_number.to_string();
+        let sequence_number = checkpoint.checkpoint_summary.sequence_number;
+        let sequence_number_str = sequence_number.to_string();
 
+        if sequence_number % 3 != self.ordinal {
+            return Ok(());
+        }
+        
         let record = FutureRecord::to("sui-checkpoints")
             .payload(&checkpoint_json)
             .key(&sequence_number_str);
@@ -28,6 +35,8 @@ impl Worker for CustomWorker {
             Ok(_) => {},
             Err((e, _)) => eprintln!("Error sending to Kafka: {:?}. Details: {:?}", e, e.to_string()),
         }
+        
+        println!("sent checkpoint: {}", sequence_number_str);
 
         Ok(())
     }
@@ -35,6 +44,15 @@ impl Worker for CustomWorker {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let pod_name = env::var("POD_NAME").unwrap_or_else(|_| "unknown".to_string());
+
+    let ordinal = pod_name.rsplit_once('-')
+        .and_then(|(_, id)| id.parse::<u64>().ok())
+        .map(|id| id)
+        .unwrap_or(0);
+
+    println!("My instance number is: {}", ordinal);
+
     let kafka_producer: FutureProducer = ClientConfig::new()
         .set("bootstrap.servers", "localhost:9092")
         .set("message.timeout.ms", "3000")
@@ -43,7 +61,7 @@ async fn main() -> Result<()> {
         .create()
         .expect("Failed to create Kafka producer");
 
-    let worker = CustomWorker { kafka_producer };
+    let worker = CustomWorker { kafka_producer, ordinal };
 
     let (executor, _term_sender) = setup_single_workflow(
         worker,
