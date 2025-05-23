@@ -1,0 +1,15 @@
+kafka:
+  replicas: 3
+  config:
+    offsets.topic.replication.factor: 3
+    transaction.state.log.replication.factor: 3
+  storage:
+    type: jbod
+    volumes:
+      - size: 100Gi
+        deleteClaim: false
+
+zookeeper:
+  replicas: 3
+  storage:
+    size: 50Gi

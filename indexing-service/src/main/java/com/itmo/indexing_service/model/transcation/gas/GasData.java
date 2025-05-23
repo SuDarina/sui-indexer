@@ -17,8 +17,8 @@ public class GasData {
     private String owner;
 
     @JsonProperty("price")
-    private BigInteger price;
+    private Long price;
 
     @JsonProperty("budget")
-    private BigInteger budget;
+    private Long budget;
 }

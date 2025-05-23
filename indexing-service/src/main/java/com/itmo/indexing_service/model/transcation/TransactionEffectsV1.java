@@ -2,7 +2,9 @@ package com.itmo.indexing_service.model.transcation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.itmo.indexing_service.model.object.objectRef.ObjectWithOwner;
 import com.itmo.indexing_service.model.transcation.gas.GasCostSummary;
+import com.itmo.indexing_service.model.object.objectRef.ObjectWithOwnerListDeserializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -32,25 +34,32 @@ public class TransactionEffectsV1 {
     private String transactionDigest;
 
     @JsonProperty("created")
-    private List<Object> created;
+    @JsonDeserialize(using = ObjectWithOwnerListDeserializer.class)
+    private List<ObjectWithOwner> created;
 
     @JsonProperty("mutated")
-    private List<List<Object>> mutated;
+    @JsonDeserialize(using = ObjectWithOwnerListDeserializer.class)
+    private List<List<ObjectWithOwner>> mutated;
 
     @JsonProperty("unwrapped")
-    private List<Object> unwrapped;
+    @JsonDeserialize(using = ObjectWithOwnerListDeserializer.class)
+    private List<ObjectWithOwner> unwrapped;
 
     @JsonProperty("deleted")
-    private List<Object> deleted;
+    @JsonDeserialize(using = ObjectWithOwnerListDeserializer.class)
+    private List<ObjectWithOwner> deleted;
 
     @JsonProperty("unwrapped_then_deleted")
-    private List<Object> unwrappedThenDeleted;
+    @JsonDeserialize(using = ObjectWithOwnerListDeserializer.class)
+    private List<ObjectWithOwner> unwrappedThenDeleted;
 
     @JsonProperty("wrapped")
-    private List<Object> wrapped;
+    @JsonDeserialize(using = ObjectWithOwnerListDeserializer.class)
+    private List<ObjectWithOwner> wrapped;
 
     @JsonProperty("gas_object")
-    private List<Object> gasObject;
+    @JsonDeserialize(using = ObjectWithOwnerListDeserializer.class)
+    private List<ObjectWithOwner> gasObject;
 
     @JsonProperty("events_digest")
     private String eventsDigest;

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse-0
+spec:
+  serviceName: clickhouse
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickhouse
+      instance: clickhouse-0
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+        instance: clickhouse-0
+    spec:
+      containers:
+      - name: clickhouse
+        image: dordidora/sui-clickhouse-server-prod:latest
+        ports:
+        - containerPort: 9000
+        - containerPort: 8123
+        - containerPort: 9444
+        volumeMounts:
+        - name: config
+          mountPath: /etc/clickhouse-server/config.xml
+          subPath: config.xml
+#        - name: remote-servers
+#          mountPath: /etc/clickhouse-server/config.d/remote_servers.xml
+#          subPath: remote_servers.xml
+        - name: users
+          mountPath: /etc/clickhouse-server/users.d/users.xml
+          subPath: users.xml
+        - name: macros
+          mountPath: /etc/clickhouse-server/config.d/macros.xml
+          subPath: macros.xml
+      volumes:
+      - name: config
+        configMap:
+          name: clickhouse-config-0
+#      - name: remote-servers
+#        configMap:
+#          name: clickhouse-remote-servers
+      - name: users
+        configMap:
+          name: clickhouse-users
+      - name: macros
+        configMap:
+          name: clickhouse-macros-0

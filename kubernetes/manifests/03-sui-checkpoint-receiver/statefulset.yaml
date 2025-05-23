@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sui-checkpoint-receiver
+spec:
+  clusterIP: None
+  selector:
+    app: sui-checkpoint-receiver
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sui-checkpoint-receiver
+spec:
+  serviceName: "sui-checkpoint-receiver"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sui-checkpoint-receiver
+  template:
+    metadata:
+      labels:
+        app: sui-checkpoint-receiver
+    spec:
+      containers:
+        - name: sui-checkpoint-receiver
+          image: dordidora/sui-checkpoint-receiver:latest
+          command: ["/usr/local/bin/remote_reader"]
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KAFKA_BROKERS
+              value: "kafka:9092"
+            - name: RUST_LOG
+              value: "info"
+          ports:
+            - containerPort: 8080

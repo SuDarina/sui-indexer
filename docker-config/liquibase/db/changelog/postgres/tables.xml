@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="1-create-transactions" author="sudarina">
+        <createTable tableName="transactions">
+            <column name="digest" type="TEXT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sender" type="TEXT"/>
+            <column name="epoch" type="BIGINT"/>
+            <column name="gas_price" type="BIGINT"/>
+            <column name="gas_budget" type="BIGINT"/>
+            <column name="timestamp_ms" type="BIGINT"/>
+            <column name="status" type="TEXT"/>
+            <column name="executed_epoch" type="BIGINT"/>
+            <column name="computation_cost" type="BIGINT"/>
+            <column name="storage_cost" type="BIGINT"/>
+            <column name="storage_rebate" type="BIGINT"/>
+            <column name="non_refundable_storage_fee" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+
+<!--    <changeSet id="2-create-objects" author="sudarina">-->
+<!--        <createTable tableName="objects">-->
+<!--            <column name="object_id" type="TEXT">-->
+<!--                <constraints primaryKey="true" nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="version" type="BIGINT"/>-->
+<!--            <column name="type" type="TEXT"/>-->
+<!--            <column name="has_public_transfer" type="BOOLEAN"/>-->
+<!--            <column name="owner_type" type="TEXT"/>-->
+<!--            <column name="initial_shared_version" type="BIGINT"/>-->
+<!--            <column name="storage_rebate" type="BIGINT"/>-->
+<!--        </createTable>-->
+<!--    </changeSet>-->
+
+    <changeSet id="3-create-transaction-object-links" author="sudarina">
+        <createTable tableName="transaction_object_links">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="transaction_digest" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="object_id" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="object_version" type="BIGINT"/>
+            <column name="object_digest" type="VARCHAR(128)"/>
+            <column name="relation_type" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <sql>
+            ALTER TABLE transaction_object_links
+                ADD CONSTRAINT chk_relation_type
+                    CHECK (relation_type IN ('INPUT', 'OUTPUT', 'MUTATED', 'CREATED', 'UNWRAPPED', 'WRAPPED', 'DELETED', 'GAS', 'UNWRAPPED_THEN_DELETED'));
+        </sql>
+    </changeSet>
+</databaseChangeLog>

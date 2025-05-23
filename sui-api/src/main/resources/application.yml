@@ -4,9 +4,9 @@ spring:
   application:
     name: sui-api
   datasource:
-    url: jdbc:postgresql://localhost:54321/sui_index
-    username: sui_user
-    password: sui_pass
+    url: jdbc:postgresql://localhost:54321/suiindex
+    username: postgres
+    password: postgres3
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -15,6 +15,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  clickhouse:
+    datasource:
+      jdbc-url: jdbc:clickhouse://localhost:8123/suiaggr
+      username: suiuser
+      password: "suipass"
+      driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
 #springdoc:
 #  api-docs:
 #    path: /v3/api-docs/flight-aggregator

@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class TransactionFailure implements TransactionStatus {
-    private String error;
+    private Object error;
     private Integer command;
 
     @Override

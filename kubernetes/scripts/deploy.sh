@@ -1,37 +1,45 @@
 #!/bin/bash
-set -e  # Прерывать выполнение при ошибках
+set -e
+
+WORK_DIR="$(pwd)"
 
 # 1. Создаем namespace
-kubectl apply -f ../manifests/00-namespace-clickhouse.yaml
+kubectl apply -f ../manifests/00-namespace.yaml
 
-# 2. Устанавливаем Zookeeper (только 2 реплики для minikube)
-kubectl apply -f ../manifests/01-zookeeper.yaml
+# 2. Разворачиваем zookeeper-кластер
+kubectl apply -f ../manifests/01-zookeeper.yaml -n sui-indexer
 
-# 3. Ждем готовности Zookeeper (только 2 пода)
-kubectl wait --for=condition=Ready pod/zookeeper-0 -n clickhouse --timeout=300s
-kubectl wait --for=condition=Ready pod/zookeeper-1 -n clickhouse --timeout=300s
+# 2. Разворачиваем clickhouse-кластер
+chmod +x ../manifests/08-clickhouse/build.sh
+cd ../manifests/08-clickhouse
+./build.sh
+cd $WORK_DIR
 
-# 4. Устанавливаем ClickHouse Operator
-helm repo add altinity https://altinity.github.io/clickhouse-operator
-helm repo update
-helm upgrade --install clickhouse-operator altinity/altinity-clickhouse-operator \
-  --namespace clickhouse \
-  --values ../helm/clickhouse-operator/values.yaml
-
-# 5. Ждем инициализации CRD
+# 3. Ждем инициализации CRD
 until kubectl get crd clickhouseinstallations.clickhouse.altinity.com &>/dev/null; do
   sleep 2
   echo "Ожидание доступности CRD..."
 done
 
-# 6. Разворачиваем ClickHouse кластер
-kubectl apply -f ../manifests/02-clickhouse.yaml
+# 4. Настройка Kafka
+helm upgrade --install kafka-operator -f ../helm/kafka/values.yaml strimzi/strimzi-kafka-operator -n sui-indexer
+kubectl apply -f ../manifests/02-kafka/kafka-cluster.yaml -n sui-indexer
+kubectl apply -f ../manifests/02-kafka/kafka-topic.yaml
 
-# Настройка PostgreSql
-kubectl apply -f manifests/03-postgresql/
-./scripts/setup-postgres-replication.sh
+# 5. Настройка PostgreSql
+helm upgrade postgresql-ha bitnami/postgresql-ha -n sui-indexer -f ../helm/postgresql-ha/values.yaml
+kubectl apply -f ../manifests/06-liquibase/liquibase-job.yaml -n sui-indexer
 
-# 7. Применяем Network Policies
-kubectl apply -f ../manifests/04-network-policies.yaml
+# 6 Разворачиваем sui-checkpoint-receiver
+kubectl apply -f ../manifests/03-sui-checkpoint-receiver/statefulset.yaml -n sui-indexer
 
-echo "ClickHouse кластер успешно развернут!"
+# 7 Разворачиваем sui-api с балансировщиком нагрузки
+kubectl apply -f ../manifests/05-sui-api/deployment.yaml -n sui-indexer
+kubectl apply -f ../manifests/05-sui-api/service.yaml -n sui-indexer
+kubectl apply -f ../manifests/05-sui-api/hpa.yaml -n sui-indexer
+
+
+# Применяем Network Policies
+#kubectl apply -f ../manifests/07-network-policies.yaml
+
+echo "Sui-indexer кластер успешно развернут!"

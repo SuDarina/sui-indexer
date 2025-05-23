@@ -3,25 +3,33 @@ server:
 spring:
   application:
     name: indexing-service
+  liquibase:
+    change-log: classpath:db/changelog/master.xml
+    enabled: false
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     consumer:
       group-id: sui-indexer
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
   datasource:
-    url: jdbc:postgresql://localhost:54321/sui_index
-    username: sui_user
-    password: sui_pass
+    jdbc-url: jdbc:postgresql://localhost:54322/suiindex
+    username: postgres
+    password: postgres3
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+clickhouse:
+    url: jdbc:clickhouse://localhost:8123/suiaggr
+    user: suiuser
+    password: "suipass"
+
 logging:
   level:
     org.springframework.kafka: error

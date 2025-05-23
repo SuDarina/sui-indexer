@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<yandex>
+    <users>
+        <suiuser>
+            <password>suipass</password>
+            <networks>
+                <ip>::/0</ip> <!-- Доступ с любого IP -->
+            </networks>
+            <profile>default</profile>
+            <quota>default</quota>
+        </suiuser>
+
+        <readonlyuser>
+            <password>readonlypassword</password>
+            <networks>
+                <ip>::/0</ip> <!-- Доступ с любого IP -->
+            </networks>
+            <profile>readonly</profile>
+            <quota>default</quota>
+        </readonlyuser>
+    </users>
+</yandex>

@@ -14,11 +14,48 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="sui_index@localhost [2]" uuid="26e96b8a-15c6-4fc5-9b52-c7bcc90aa25f">
+    <data-source source="LOCAL" name="suiindex@localhost" uuid="26e96b8a-15c6-4fc5-9b52-c7bcc90aa25f">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:54322/sui_index</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:54322/suiindex</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="com.intellij.clouds.kubernetes.db.host.port" />
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
+        <property name="com.intellij.clouds.kubernetes.db.container.port" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="suiaggr@localhost" uuid="751ab97f-5949-4e48-b8fe-35c0966a9880">
+      <driver-ref>clickhouse</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.clickhouse.jdbc.ClickHouseDriver</jdbc-driver>
+      <jdbc-url>jdbc:clickhouse://localhost:8123/suiaggr</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="com.intellij.clouds.kubernetes.db.host.port" />
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
+        <property name="com.intellij.clouds.kubernetes.db.resource.type" value="Deployment" />
+        <property name="com.intellij.clouds.kubernetes.db.container.port" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="suiindex@localhost [2]" uuid="ee629e26-2a1e-4b1f-baa1-211db1f40280">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:54323/suiindex</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="com.intellij.clouds.kubernetes.db.host.port" />
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
+        <property name="com.intellij.clouds.kubernetes.db.container.port" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="suiaggr@localhost [2]" uuid="9de37828-320b-43c0-abd7-69c7dcd98dcb">
+      <driver-ref>clickhouse</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.clickhouse.jdbc.ClickHouseDriver</jdbc-driver>
+      <jdbc-url>jdbc:clickhouse://localhost:8124/suiaggr</jdbc-url>
       <jdbc-additional-properties>
         <property name="com.intellij.clouds.kubernetes.db.host.port" />
         <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />

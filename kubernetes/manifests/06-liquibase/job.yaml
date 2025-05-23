@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: liquibase-migrate
+  namespace: sui-indexer
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: extract-changelog
+          image: busybox
+          command:
+            - sh
+            - -c
+            - "mkdir -p /liquibase/changelog && tar -xzf /tmp/changelog.tar.gz -C /liquibase/changelog"
+          volumeMounts:
+            - name: changelog-archive
+              mountPath: /tmp/changelog.tar.gz
+              subPath: changelog.tar.gz
+            - name: changelog-dir
+              mountPath: /liquibase/changelog
+      containers:
+        - name: liquibase
+          image: liquibase/liquibase:latest
+          args:
+            - --url=jdbc:postgresql://postgresql-ha-pgpool:5432/suiindex
+            - --changeLogFile=/liquibase/changelog/master.xml
+            - --username=postgres
+            - --password=postgres3
+            - update
+          volumeMounts:
+            - name: changelog-dir
+              mountPath: /liquibase/changelog
+      volumes:
+        - name: changelog-archive
+          configMap:
+            name: liquibase-changelog
+        - name: changelog-dir
+          emptyDir: {}

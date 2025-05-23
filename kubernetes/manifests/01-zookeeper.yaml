@@ -1,24 +1,45 @@
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: zookeeper
-  namespace: clickhouse
+  namespace: sui-indexer
 spec:
-  ports:
-    - port: 2181
-      name: client
   clusterIP: None
   selector:
     app: zookeeper
+  ports:
+    - name: client
+      port: 2181
+    - name: peer
+      port: 2888
+    - name: leader-election
+      port: 3888
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zookeeper-config
+  namespace: sui-indexer
+data:
+  zoo.cfg: |
+    tickTime=2000
+    initLimit=5
+    syncLimit=2
+    dataDir=/data
+    clientPort=2181
+    server.0=zookeeper-0.zookeeper.sui-indexer.svc.cluster.local:2888:3888
+    server.1=zookeeper-1.zookeeper.sui-indexer.svc.cluster.local:2888:3888
+    server.2=zookeeper-2.zookeeper.sui-indexer.svc.cluster.local:2888:3888
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zookeeper
-  namespace: clickhouse
+  namespace: sui-indexer
 spec:
-  serviceName: zookeeper
-  replicas: 2
+  serviceName: "zookeeper"
+  replicas: 3
   selector:
     matchLabels:
       app: zookeeper
@@ -32,20 +53,53 @@ spec:
           image: zookeeper:3.8
           ports:
             - containerPort: 2181
+              name: client
+            - containerPort: 2888
+              name: peer
+            - containerPort: 3888
+              name: leader-election
           env:
             - name: ZOO_MY_ID
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-                  apiVersion: v1
+            - name: ALLOW_ANONYMOUS_LOGIN
+              value: "yes"
+          command:
+            - sh
+            - -c
+            - |
+              MY_ID=$(echo ${ZOO_MY_ID} | awk -F'-' '{print $NF}')
+              echo $MY_ID > /data/myid
+              /docker-entrypoint.sh zkServer.sh start-foreground
           volumeMounts:
-            - name: zk-data
+            - name: datadir
               mountPath: /data
+            - name: config
+              mountPath: /conf
+      volumes:
+        - name: config
+          configMap:
+            name: zookeeper-config
   volumeClaimTemplates:
     - metadata:
-        name: zk-data
+        name: datadir
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 10Gi
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-external
+  namespace: sui-indexer
+spec:
+  type: LoadBalancer
+  selector:
+    app: zookeeper
+  ports:
+    - name: client
+      port: 2181
+      targetPort: 2181

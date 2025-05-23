@@ -21,6 +21,10 @@ services:
     image: confluentinc/cp-zookeeper:latest
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    volumes:
+      - zk_data:/var/lib/zookeeper/data
+    ports:
+      - "2181:2181"
 
   kafka:
     image: confluentinc/cp-kafka:latest
@@ -33,7 +37,9 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+#      TODO (на будущее) лучше запретить автосоздание топиков и контролировать эти параметры для каждого топика отдельно
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_NUM_PARTITIONS: 10
 
   kafka-manager:
     image: hlebalbau/kafka-manager:stable
@@ -42,7 +48,7 @@ services:
       - zookeeper
       - kafka
     ports:
-      - "9000:9000"
+      - "9001:9000"
     environment:
       ZK_HOSTS: zookeeper:2181
       KAFKA_MANAGER_AUTH_ENABLED: "false"
@@ -55,175 +61,87 @@ services:
            "activeOffsetCacheEnabled": false }]
     restart: always
 
-  # PostgreSQL Master
-  postgres-master:
+  sui-postgres:
     image: postgres:15
-    container_name: postgres-master
+    container_name: sui-postgres
     user: postgres
     environment:
-      POSTGRES_USER: sui_user
-      POSTGRES_PASSWORD: sui_pass
-      POSTGRES_DB: sui_index
-    ports:
-      - "54321:5432"
-    volumes:
-      - pg_master_data:/var/lib/postgresql/data
-    command: >
-      bash -c "
-            echo 'Configuring master server...' &&
-            echo 'wal_level = replica' >> /var/lib/postgresql/data/postgresql.conf &&
-            echo 'max_wal_senders = 10' >> /var/lib/postgresql/data/postgresql.conf &&
-            echo 'wal_keep_size = 1GB' >> /var/lib/postgresql/data/postgresql.conf &&
-            echo 'hot_standby = on' >> /var/lib/postgresql/data/postgresql.conf &&
-            echo 'host replication sui_user 0.0.0.0/0 md5' >> /var/lib/postgresql/data/pg_hba.conf &&
-            exec postgres -c config_file=/var/lib/postgresql/data/postgresql.conf"
-
-  postgres-replica:
-    image: postgres:15
-    container_name: postgres-replica
-    user: postgres
-    environment:
-      POSTGRES_USER: sui_user
-      POSTGRES_PASSWORD: sui_pass
-      POSTGRES_DB: sui_index
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres3
+      POSTGRES_DB: suiindex
     ports:
       - "54322:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  sui-liquibase-postgres:
+    image: dordidora/sui-liquibase:latest
+    container_name: sui-liquibase-postgres
     depends_on:
-      - postgres-master
-    volumes:
-      - pg_replica_data:/var/lib/postgresql/data
+      - sui-postgres
+#    volumes:
+#      - ./docker-config/liquibase/db/changelog:/liquibase/changelog
+    environment:
+      POSTGRESQL_URL: jdbc:postgresql://sui-postgres:5432/suiindex
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: postgres3
     command: >
-      bash -c "
-            echo 'Waiting for master to be ready...' &&
-            until pg_isready -h postgres-master -p 5432 -U sui_user; do sleep 1; done &&
-            echo 'Setting up replica...' &&
-            rm -rf /var/lib/postgresql/data/* &&
-            PGPASSWORD=sui_pass pg_basebackup -h postgres-master -p 5432 -U sui_user -D /var/lib/postgresql/data -Fp -Xs -P -R &&
-            echo \"primary_conninfo = 'host=postgres-master port=5432 user=sui_user password=sui_pass'\" >> /var/lib/postgresql/data/postgresql.conf &&
-            echo \"promote_trigger_file = '/tmp/promote_to_master'\" >> /var/lib/postgresql/data/postgresql.conf &&
-            touch /var/lib/postgresql/data/standby.signal &&
-            chmod 700 /var/lib/postgresql/data &&
-            exec postgres -c config_file=/var/lib/postgresql/data/postgresql.conf"
+      /bin/sh -c "liquibase --url=jdbc:postgresql://sui-postgres:5432/suiindex --username=postgres 
+      --password=postgres3 --changelog-file=master.xml --searchPath=/liquibase/changelog update"
 
-  # ClickHouse Replica
-  clickhouse-master:
-    image: clickhouse/clickhouse-server:23.8
-    container_name: clickhouse-master
-    user: clickhouse
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
+  clickhouse:
+    image: dordidora/sui-clickhouse-server:latest
+    container_name: clickhouse
     ports:
-      - "8123:8123" # HTTP
-      - "9001:9000" # Native TCP
-      - "9009:9009" # Interserver HTTP
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
     volumes:
-      - ch_master_data:/var/lib/clickhouse
-      - ch_master_config:/etc/clickhouse-server
-    command:
-      - /bin/bash
-      - -c
-      - |
-        echo "Configuring master server..."
-        echo -e "
-        <yandex>
-          <zookeeper>
-            <node index=\"1\">
-              <host>zookeeper</host>
-              <port>2181</port>
-            </node>
-          </zookeeper>
-          <distributed_ddl>
-            <path>/clickhouse/task_queue/ddl</path>
-          </distributed_ddl>
-          <remote_servers>
-            <replicated_cluster>
-              <shard>
-                <replica>
-                  <host>clickhouse-master</host>
-                  <port>9000</port>
-                </replica>
-                <replica>
-                  <host>clickhouse-replica</host>
-                  <port>9000</port>
-                </replica>
-              </shard>
-            </replicated_cluster>
-          </remote_servers>
-          <macros>
-            <shard>1</shard>
-            <replica>master</replica>
-          </macros>
-        </yandex>
-        " > /etc/clickhouse-server/config.d/replication.xml
-        exec /usr/bin/clickhouse-server --config-file=/etc/clickhouse-server/config.xml
+      - ch_data:/var/lib/clickhouse
+#      - ./docker-config/clickhouse/init:/docker-entrypoint-initdb.d/
+    environment:
+      CLICKHOUSE_DB: suiaggr
+      CLICKHOUSE_USER: suiuser
+      CLICKHOUSE_PASSWORD: suipass
 
-  clickhouse-replica:
-      image: clickhouse/clickhouse-server:23.8
-      container_name: clickhouse-replica
-      user: clickhouse
-      depends_on:
-        - clickhouse-master
-        - zookeeper
-      ulimits:
-        nofile:
-          soft: 262144
-          hard: 262144
-      ports:
-        - "8124:8123" # HTTP
-        - "9002:9000" # Native TCP
-        - "9010:9009" # Interserver HTTP
-      volumes:
-        - ch_replica_data:/var/lib/clickhouse
-        - ch_replica_config:/etc/clickhouse-server
-      command:
-        - /bin/bash
-        - -c
-        - |
-          echo "Waiting for master to be ready..."
-          while ! clickhouse-client --host clickhouse-master --query "SELECT 1"; do sleep 1; done
-          echo "Configuring replica server..."
-          echo -e "
-          <yandex>
-            <zookeeper>
-              <node index=\"1\">
-                <host>zookeeper</host>
-                <port>2181</port>
-              </node>
-            </zookeeper>
-            <distributed_ddl>
-              <path>/clickhouse/task_queue/ddl</path>
-            </distributed_ddl>
-            <remote_servers>
-              <replicated_cluster>
-                <shard>
-                  <replica>
-                    <host>clickhouse-master</host>
-                    <port>9000</port>
-                  </replica>
-                  <replica>
-                    <host>clickhouse-replica</host>
-                    <port>9000</port>
-                  </replica>
-                </shard>
-              </replicated_cluster>
-            </remote_servers>
-            <macros>
-              <shard>1</shard>
-              <replica>replica</replica>
-            </macros>
-          </yandex>
-          " > /etc/clickhouse-server/config.d/replication.xml
-          exec /usr/bin/clickhouse-server --config-file=/etc/clickhouse-server/config.xml
+  sui-checkpoint-receiver:
+    build:
+      context: ./sui-checkpoint-receiver
+      dockerfile: Dockerfile
+    container_name: sui-checkpoint-receiver
+    environment:
+      - POD_NAME=remote-reader-0
+    depends_on:
+      - kafka
 
+  indexing-service:
+    build:
+      context: .
+      dockerfile: indexing-service/Dockerfile
+    container_name: indexing-service
+    environment:
+        - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    depends_on:
+      - kafka
+#      - sui-postgres
+#      - clickhouse
+    ports:
+      - "8081:8081"
+
+  sui-api:
+    build:
+      context: ./sui-api
+      dockerfile: Dockerfile
+    container_name: sui-api
+    environment:
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    depends_on:
+      - sui-postgres
+    ports:
+      - "8082:8082"
+      - "8082:8082"
 
 volumes:
-  pg_master_data:
-  pg_replica_data:
-  ch_master_data:
-  ch_master_config:
-  ch_replica_data:
-  ch_replica_config:
-
-
+  zk_data:
+  pg_data:
+  ch_data:
