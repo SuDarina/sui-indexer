@@ -1,7 +1,6 @@
 # Stage 1: Builder
 FROM rust:latest as builder
 
-# Установка всех необходимых системных зависимостей
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     clang \
@@ -17,20 +16,17 @@ RUN apt-get update && \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Переменные окружения
 ENV CARGO_TERM_COLOR=always
 ENV RUST_BACKTRACE=1
 
 WORKDIR /usr/app
 
-# Копируем манифесты отдельно для кеширования зависимостей
 COPY Cargo.toml Cargo.lock ./
 
 COPY ./src ./src
 
 RUN cargo check --release
 
-# Финальная сборка нужного бинарника
 RUN cargo build --bin remote_reader --release
 
 # Stage 2: Runtime

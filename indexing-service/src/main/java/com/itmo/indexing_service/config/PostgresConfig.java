@@ -42,7 +42,7 @@ public class PostgresConfig {
     ) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.itmo.model.postgres") // только Postgres сущности!
+                .packages("com.itmo.model.postgres")
                 .persistenceUnit("postgres")
                 .build();
     }

@@ -7,7 +7,7 @@ spring:
     change-log: classpath:db/changelog/master.xml
     enabled: false
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: localhost:9092
     consumer:
       group-id: sui-indexer
       auto-offset-reset: earliest
@@ -26,10 +26,23 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 clickhouse:
-    url: jdbc:clickhouse://localhost:8123/suiaggr
-    user: suiuser
-    password: "suipass"
+  url: jdbc:clickhouse://localhost:8123/suiaggr
+  user: suiuser
+  password: "suipass"
 
 logging:
   level:
     org.springframework.kafka: error
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: indexing-service
+  endpoint:
+    health:
+      show-details: never
+    prometheus:
+      enabled: true

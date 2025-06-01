@@ -23,7 +23,7 @@ impl Worker for CustomWorker {
         let sequence_number = checkpoint.checkpoint_summary.sequence_number;
         let sequence_number_str = sequence_number.to_string();
 
-        if sequence_number % 3 != self.ordinal {
+        if sequence_number % 1 != self.ordinal {
             return Ok(());
         }
         
@@ -36,7 +36,7 @@ impl Worker for CustomWorker {
             Err((e, _)) => eprintln!("Error sending to Kafka: {:?}. Details: {:?}", e, e.to_string()),
         }
         
-        println!("sent checkpoint: {}", sequence_number_str);
+        // println!("sent checkpoint: {}", sequence_number_str);
 
         Ok(())
     }
@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
     println!("My instance number is: {}", ordinal);
 
     let kafka_producer: FutureProducer = ClientConfig::new()
-        .set("bootstrap.servers", "localhost:9092")
+        .set("bootstrap.servers", "localhost:29092")
         .set("message.timeout.ms", "3000")
         .set("message.max.bytes", "10485760")
         .set("compression.type", "gzip")
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
         worker,
         "https://checkpoints.testnet.sui.io".to_string(),
         0,
-        1,
+        4,
         None,
     )
     .await?;

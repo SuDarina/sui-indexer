@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.kafka.annotation.EnableKafka;
 
 @EnableKafka
-//@EntityScan(basePackages = "com.itmo.model.postgres")
-//@EnableJpaRepositories(basePackages = "com.itmo.indexing_service.repository.postgres")
 @SpringBootApplication
 public class IndexingServiceApplication {
 

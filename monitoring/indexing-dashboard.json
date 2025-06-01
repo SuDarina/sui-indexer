@@ -1,0 +1,101 @@
+{
+  "id": null,
+  "title": "Indexing Service Metrics",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["indexing-service", "monitoring"],
+  "panels": [
+    {
+      "type": "graph",
+      "title": "CPU Usage %",
+      "targets": [
+        {
+          "expr": "process_cpu_usage * 100",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [
+        { "format": "percent", "label": "CPU", "min": 0, "max": 100 },
+        { "format": "short" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Memory Usage (MB)",
+      "targets": [
+        {
+          "expr": "process_memory_usage_bytes / 1024 / 1024",
+          "legendFormat": "{{instance}}",
+          "refId": "B"
+        }
+      ],
+      "yaxes": [
+        { "format": "megabytes", "label": "RAM" },
+        { "format": "short" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Checkpoint Latency (ms)",
+      "targets": [
+        {
+          "expr": "rate(indexing_checkpoint_latency_ms_sum[1m]) / rate(indexing_checkpoint_latency_ms_count[1m])",
+          "legendFormat": "Avg latency (ms)",
+          "refId": "C"
+        }
+      ],
+      "yaxes": [
+        { "format": "ms", "label": "Latency" },
+        { "format": "short" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Checkpoint Latency StdDev (ms)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(indexing_checkpoint_latency_ms_bucket[1m]))",
+          "legendFormat": "p95 latency",
+          "refId": "D"
+        }
+      ],
+      "yaxes": [
+        { "format": "ms", "label": "p95" },
+        { "format": "short" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Checkpoint Throughput (checkpoints/sec)",
+      "targets": [
+        {
+          "expr": "rate(indexing_checkpoint_latency_ms_count[1m])",
+          "legendFormat": "Throughput",
+          "refId": "E"
+        }
+      ],
+      "yaxes": [
+        { "format": "ops", "label": "Throughput" },
+        { "format": "short" }
+      ]
+    },
+    {
+      "type": "piechart",
+      "title": "Load Distribution per Instance",
+      "targets": [
+        {
+          "expr": "rate(indexing_checkpoint_latency_ms_count[5m])",
+          "legendFormat": "{{instance}}",
+          "refId": "F"
+        }
+      ],
+      "options": {
+        "pieType": "pie",
+        "legend": { "show": true, "values": true }
+      }
+    }
+  ]
+}

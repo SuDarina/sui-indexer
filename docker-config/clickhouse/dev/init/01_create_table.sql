@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS suiaggr.minute_transactions
     ORDER BY (date, hour, minute);
 
 
-CREATE TABLE suiaggr.transaction_analytics (
+CREATE TABLE IF NOT EXISTS suiaggr.transaction_analytics (
     -- Время
                                        date DateTime64(3),
                                        datetime DateTime64(3),

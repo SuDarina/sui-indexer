@@ -10,6 +10,7 @@ tokio = { version = "1.38.0", features = ["full"]}
 rdkafka = "0.28"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
 sui-types = { git = "https://github.com/MystenLabs/sui", package = "sui-types" }
 sui-data-ingestion-core = { git = "https://github.com/MystenLabs/sui", package = "sui-data-ingestion-core" }
 prometheus = "0.13.3"
@@ -26,5 +27,10 @@ path = "src/remote_reader.rs"
 [[bin]]
 name = "test"
 path = "src/test.rs"
+
+[[bin]]
+name = "analyze_logs"
+path = "src/analyze_logs.rs"
+
 
 [workspace]

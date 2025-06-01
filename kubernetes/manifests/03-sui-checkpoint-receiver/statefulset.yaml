@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: sui-checkpoint-receiver
+  namespace: sui-indexer
 spec:
   clusterIP: None
   selector:
@@ -11,6 +12,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: sui-checkpoint-receiver
+  namespace: sui-indexer
 spec:
   serviceName: "sui-checkpoint-receiver"
   replicas: 3
@@ -22,6 +24,16 @@ spec:
       labels:
         app: sui-checkpoint-receiver
     spec:
+      terminationGracePeriodSeconds: 10
+      initContainers:
+        - name: wait-for-indexing
+          image: curlimages/curl:latest
+          command:
+            [
+              "sh",
+              "-c",
+              "until curl -s --fail http://indexing-service-0.indexing-service.sui-indexer.svc.cluster.local:8081/actuator/health; do echo waiting for indexing-service; sleep 5; done"
+            ]
       containers:
         - name: sui-checkpoint-receiver
           image: dordidora/sui-checkpoint-receiver:latest
@@ -31,9 +43,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: KAFKA_BROKERS
-              value: "kafka:9092"
-            - name: RUST_LOG
-              value: "info"
-          ports:
-            - containerPort: 8080
+#            - name: KAFKA_BROKERS
+#              value: "kafka:9092"
+#            - name: RUST_LOG
+#              value: "info"

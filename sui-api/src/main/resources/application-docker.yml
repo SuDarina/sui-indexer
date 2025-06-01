@@ -4,11 +4,10 @@ spring:
   application:
     name: sui-api
   datasource:
-    url: jdbc:postgresql://postgresql-ha-postgresql-headless.sui-indexer.svc.cluster.local:5432/suiindex?loadBalanceHosts=true&targetServerType=preferSecondary
+    url: jdbc:postgresql://sui-postgres:5432/suiindex
     username: postgres
-    password: postgres123
-    hikari:
-      connection-init-sql: "SET TRANSACTION READ ONLY"
+    password: postgres3
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
@@ -18,7 +17,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   clickhouse:
     datasource:
-      jdbc-url: jdbc:clickhouse://clickhouse.sui-indexer.svc.cluster.local:8123/suiaggr
+      jdbc-url: jdbc:clickhouse://clickhouse:8123/suiaggr
       username: suiuser
       password: "suipass"
       driver-class-name: ru.yandex.clickhouse.ClickHouseDriver

@@ -38,3 +38,12 @@ spring:
 logging:
   level:
     org.springframework.kafka: error
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never

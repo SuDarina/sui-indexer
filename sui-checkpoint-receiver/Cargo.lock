@@ -6408,6 +6408,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "base64 0.13.1",
+ "chrono",
  "prometheus",
  "rdkafka",
  "serde",

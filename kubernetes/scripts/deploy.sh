@@ -6,10 +6,10 @@ WORK_DIR="$(pwd)"
 # 1. Создаем namespace
 kubectl apply -f ../manifests/00-namespace.yaml
 
-# 2. Разворачиваем zookeeper-кластер
+# 2.1 Разворачиваем zookeeper-кластер
 kubectl apply -f ../manifests/01-zookeeper.yaml -n sui-indexer
 
-# 2. Разворачиваем clickhouse-кластер
+# 2.2 Разворачиваем clickhouse-кластер
 chmod +x ../manifests/08-clickhouse/build.sh
 cd ../manifests/08-clickhouse
 ./build.sh
@@ -30,16 +30,19 @@ kubectl apply -f ../manifests/02-kafka/kafka-topic.yaml
 helm upgrade postgresql-ha bitnami/postgresql-ha -n sui-indexer -f ../helm/postgresql-ha/values.yaml
 kubectl apply -f ../manifests/06-liquibase/liquibase-job.yaml -n sui-indexer
 
-# 6 Разворачиваем sui-checkpoint-receiver
+## 6. Разворачиваем indexing-service
+kubectl apply -f ../manifests/04-indexing-service/statefulset.yaml -n sui-indexer
+
+## 7. Разворачиваем sui-checkpoint-receiver
 kubectl apply -f ../manifests/03-sui-checkpoint-receiver/statefulset.yaml -n sui-indexer
 
-# 7 Разворачиваем sui-api с балансировщиком нагрузки
+## 8. Разворачиваем sui-api с балансировщиком нагрузки
 kubectl apply -f ../manifests/05-sui-api/deployment.yaml -n sui-indexer
 kubectl apply -f ../manifests/05-sui-api/service.yaml -n sui-indexer
 kubectl apply -f ../manifests/05-sui-api/hpa.yaml -n sui-indexer
 
 
 # Применяем Network Policies
-#kubectl apply -f ../manifests/07-network-policies.yaml
+kubectl apply -f ../manifests/07-network-policies.yaml
 
 echo "Sui-indexer кластер успешно развернут!"
