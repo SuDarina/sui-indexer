@@ -30,13 +30,18 @@ kubectl apply -f ../manifests/02-kafka/kafka-topic.yaml
 helm upgrade postgresql-ha bitnami/postgresql-ha -n sui-indexer -f ../helm/postgresql-ha/values.yaml
 kubectl apply -f ../manifests/06-liquibase/liquibase-job.yaml -n sui-indexer
 
-## 6. Разворачиваем indexing-service
+# 6. Разворачиваем кластер Redis
+kubectl apply -f ../manifests/09-redis/redis-configmap.yaml
+kubectl apply -f ../manifests/09-redis/redis-headless-service.yaml
+kubectl apply -f ../manifests/09-redis/redis-statefulset.yaml
+
+# 7. Разворачиваем indexing-service
 kubectl apply -f ../manifests/04-indexing-service/statefulset.yaml -n sui-indexer
 
-## 7. Разворачиваем sui-checkpoint-receiver
+# 8. Разворачиваем sui-checkpoint-receiver
 kubectl apply -f ../manifests/03-sui-checkpoint-receiver/statefulset.yaml -n sui-indexer
 
-## 8. Разворачиваем sui-api с балансировщиком нагрузки
+# 9. Разворачиваем sui-api с балансировщиком нагрузки
 kubectl apply -f ../manifests/05-sui-api/deployment.yaml -n sui-indexer
 kubectl apply -f ../manifests/05-sui-api/service.yaml -n sui-indexer
 kubectl apply -f ../manifests/05-sui-api/hpa.yaml -n sui-indexer

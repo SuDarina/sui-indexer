@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+spec:
+  serviceName: "redis"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: redis
+          image: redis:7.2-alpine
+          command: ["redis-server", "/etc/redis/redis.conf"]
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-config
+              mountPath: /etc/redis
+            - name: redis-data
+              mountPath: /data
+        - name: sentinel
+          image: redis:7.2-alpine
+          command: ["redis-server", "/etc/sentinel/sentinel.conf", "--sentinel"]
+          ports:
+            - containerPort: 26379
+          volumeMounts:
+            - name: sentinel-config
+              mountPath: /etc/sentinel
+      volumes:
+        - name: redis-config
+          configMap:
+            name: redis-config
+        - name: sentinel-config
+          configMap:
+            name: sentinel-config
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

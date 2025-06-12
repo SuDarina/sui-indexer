@@ -63,11 +63,12 @@ async fn main() -> Result<()> {
 
     let worker = CustomWorker { kafka_producer, ordinal };
 
+    let num_workers = 4;
     let (executor, _term_sender) = setup_single_workflow(
         worker,
         "https://checkpoints.testnet.sui.io".to_string(),
         0,
-        4,
+        num_workers,
         None,
     )
     .await?;
