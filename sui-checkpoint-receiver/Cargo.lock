@@ -173,7 +173,7 @@ source = "git+https://github.com/mystenlabs/anemo.git?rev=e609f7697ed6169bf07608
 dependencies = [
  "anemo",
  "bytes",
- "dashmap",
+ "dashmap 5.5.3",
  "futures",
  "governor",
  "nonzero_ext",
@@ -1701,6 +1701,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashmap"
+version = "6.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5041cc499144891f3790297212f32a74fb938e5136a14943f338ef9e0ae276cf"
+dependencies = [
+ "cfg-if",
+ "crossbeam-utils",
+ "hashbrown 0.14.5",
+ "lock_api",
+ "once_cell",
+ "parking_lot_core",
+]
+
+[[package]]
 name = "data-encoding"
 version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2280,6 +2294,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37ab347416e802de484e4d03c7316c48f1ecb56574dfd4a46a80f173ce1de04d"
 
 [[package]]
+name = "fixedbitset"
+version = "0.5.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d674e81391d1e1ab681a28d99df07927c6d4aa5b027d7da16ba32d1d21ecd99"
+
+[[package]]
 name = "flate2"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2499,7 +2519,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68a7f542ee6b35af73b06abc0dad1c1bae89964e4e253bc4b587b91c9637867b"
 dependencies = [
  "cfg-if",
- "dashmap",
+ "dashmap 5.5.3",
  "futures",
  "futures-timer",
  "no-std-compat",
@@ -3655,7 +3675,7 @@ dependencies = [
  "indexmap 2.7.1",
  "move-binary-format",
  "move-core-types",
- "petgraph",
+ "petgraph 0.5.1",
  "serde-reflection",
 ]
 
@@ -3671,7 +3691,7 @@ dependencies = [
  "move-bytecode-verifier-meter",
  "move-core-types",
  "move-vm-config",
- "petgraph",
+ "petgraph 0.5.1",
 ]
 
 [[package]]
@@ -3728,7 +3748,7 @@ dependencies = [
  "move-proc-macros",
  "move-symbol-pool",
  "once_cell",
- "petgraph",
+ "petgraph 0.5.1",
  "rayon",
  "regex",
  "serde",
@@ -3780,7 +3800,7 @@ dependencies = [
  "move-command-line-common",
  "move-core-types",
  "move-ir-types",
- "petgraph",
+ "petgraph 0.5.1",
  "serde",
 ]
 
@@ -4013,6 +4033,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "multimap"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d87ecb2933e8aeadb3e3a02b828fed80a7528047e68b4f424523a0981a3a084"
+
+[[package]]
+name = "murmur3"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9252111cf132ba0929b6f8e030cac2a24b507f3a4d6db6fb2896f27b354c714b"
+
+[[package]]
 name = "mysten-common"
 version = "0.1.0"
 source = "git+https://github.com/MystenLabs/sui#f89030b3bef0a1cb23901df2eda3dc08f67deb19"
@@ -4038,7 +4070,7 @@ source = "git+https://github.com/MystenLabs/sui#f89030b3bef0a1cb23901df2eda3dc08
 dependencies = [
  "async-trait",
  "axum 0.7.9",
- "dashmap",
+ "dashmap 5.5.3",
  "futures",
  "once_cell",
  "parking_lot",
@@ -4738,8 +4770,18 @@ version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "467d164a6de56270bd7c4d070df81d07beace25012d5103ced4e9ff08d6afdb7"
 dependencies = [
- "fixedbitset",
+ "fixedbitset 0.2.0",
  "indexmap 1.9.3",
+]
+
+[[package]]
+name = "petgraph"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3672b37090dbd86368a4145bc067582552b29c27377cad4e0a306c97f9bd7772"
+dependencies = [
+ "fixedbitset 0.5.7",
+ "indexmap 2.7.1",
 ]
 
 [[package]]
@@ -5035,6 +5077,26 @@ checksum = "2796faa41db3ec313a31f7624d9286acf277b52de526150b7e69f3debf891ee5"
 dependencies = [
  "bytes",
  "prost-derive 0.13.5",
+]
+
+[[package]]
+name = "prost-build"
+version = "0.13.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be769465445e8c1474e9c5dac2018218498557af32d9ed057325ec9a41ae81bf"
+dependencies = [
+ "heck 0.5.0",
+ "itertools 0.14.0",
+ "log",
+ "multimap",
+ "once_cell",
+ "petgraph 0.7.1",
+ "prettyplease",
+ "prost 0.13.5",
+ "prost-types 0.13.5",
+ "regex",
+ "syn 2.0.98",
+ "tempfile",
 ]
 
 [[package]]
@@ -6409,12 +6471,14 @@ dependencies = [
  "async-trait",
  "base64 0.13.1",
  "chrono",
+ "murmur3",
  "prometheus",
  "rdkafka",
  "serde",
  "serde_json",
  "sui-data-ingestion-core",
  "sui-types",
+ "swim-rs",
  "tokio",
 ]
 
@@ -6855,6 +6919,24 @@ dependencies = [
  "tracing",
  "typed-store-error",
  "x509-parser",
+]
+
+[[package]]
+name = "swim-rs"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ff07dd388ebcae0c1e321c5db20b3cd4ec499aa8e48403874728432229bde64"
+dependencies = [
+ "async-trait",
+ "dashmap 6.1.0",
+ "lazy_static",
+ "prost 0.13.5",
+ "prost-build",
+ "rand 0.8.5",
+ "snafu",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

@@ -111,19 +111,20 @@ services:
     build:
       context: ./sui-checkpoint-receiver
       dockerfile: Dockerfile
-    container_name: sui-checkpoint-receiver
+    container_name: sui-checkpoint-receiver-1
     environment:
-      - POD_NAME=remote-reader-0
+      - POD_NAME=sui-checkpoint-receiver-1
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - SWIM_SEEDS="sui-checkpoint-receiver-2:7000"
     depends_on:
       - kafka
 
   sui-checkpoint-receiver-2:
-    build:
-      context: ./sui-checkpoint-receiver
-      dockerfile: Dockerfile
-    container_name: sui-checkpoint-receiver
+    image: sui-indexer-sui-checkpoint-receiver-1:latest
+    container_name: sui-checkpoint-receiver-2
     environment:
-      - POD_NAME=remote-reader-1
+      - POD_NAME=sui-checkpoint-receiver-2
+      - SWIM_SEEDS="sui-checkpoint-receiver-1:7000"
     depends_on:
       - kafka
 

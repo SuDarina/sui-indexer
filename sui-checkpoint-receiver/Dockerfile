@@ -13,6 +13,7 @@ RUN apt-get update && \
     curl \
     libssl-dev \
     librdkafka-dev \
+    protobuf-compiler \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 

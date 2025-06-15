@@ -15,6 +15,9 @@ sui-types = { git = "https://github.com/MystenLabs/sui", package = "sui-types" }
 sui-data-ingestion-core = { git = "https://github.com/MystenLabs/sui", package = "sui-data-ingestion-core" }
 prometheus = "0.13.3"
 anyhow = "1.0.86"
+swim-rs = "*"
+murmur3 = "0.5.2"
+
 
 [[bin]]
 name = "local_reader"
@@ -23,14 +26,6 @@ path = "src/local_reader.rs"
 [[bin]]
 name = "remote_reader"
 path = "src/remote_reader.rs"
-
-[[bin]]
-name = "test"
-path = "src/test.rs"
-
-[[bin]]
-name = "analyze_logs"
-path = "src/analyze_logs.rs"
 
 
 [workspace]
